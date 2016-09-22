@@ -1,10 +1,19 @@
 #!/bin/bash
-git config --global user.email "alessandrochelli@gmail.com"
-git config --global user.name "alechelli"
+git config user.email "alessandrochelli@gmail.com"
+git config user.name "alechelli"
 cp -f Identifier.apio Identifier.old.apio
 git stash
 git pull
 cp -f Identifier.old.apio Identifier.apio
 rm Identifier.old.apio
+
+#Deleting previous wvdial configuration
+f=$(grep -n _per /etc/rc.local | cut -d ':' -f1 | head -n 1)
+l=$(grep -n wvdial /etc/rc.local | cut -d ':' -f1 | tail -n 1)
+if [ ! -z "$f" -a ! -z "$l" ];then
+    sed "${f},${l}d" -i /etc/rc.local
+fi
+#
+
 npm install
 bower install --allow-root
