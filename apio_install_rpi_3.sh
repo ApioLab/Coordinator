@@ -1,5 +1,4 @@
 #!/bin/bash
-
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run as root" 1>&2
     exit 1
@@ -92,8 +91,14 @@ else
 
     #Add services to rc.local
     lines_number=$(wc -l < /etc/rc.local)
-    #sed -i "$((lines_number-1)) a mongod --repair\nifup wlan0\nservice udhcpd restart\n#wvdial & > /dev/null\nbash /home/$user/start.sh" /etc/rc.local
-    sed -i "$((lines_number-1)) a mongod --repair\nifup wlan0\nservice udhcpd restart\n_per="'$(dmesg | grep '"'"'GSM modem'"'"' | grep '"'"'option'"'"' | head -n 1 | awk '"'"'{print $4}'"'"' | cut -d '"'"':'"'"' -f1)'"\nwvdial & > /dev/null\npkill wvdial\nif [ ! -z "'$_per'" ]; then\n\techo "'$_per'" | tee /sys/bus/usb/drivers/usb/unbind\n\techo "'$_per'" | tee /sys/bus/usb/drivers/usb/bind\n\t_old_per="'$(cat /etc/wvdial.conf | grep '"'"'Modem ='"'"' | awk '"'"'{print $NF}'"'"')'"\n\t_new_per=/dev/"'$(dmesg | grep '"'"'GSM modem'"'"' | grep '"'"'usb'"'"' | grep '"'"'tty'"'"' | sed '"'"'5!d'"'"' | awk '"'"'{print $NF}'"'"')'"\n\tsed -i -e \"s|"'$_old_per'"|"'$_new_per'"|\" /etc/wvdial.conf\nfi\nwvdial & > /dev/null\nbash /home/$user/start.sh" /etc/rc.local
+    sed -i "$((lines_number-1)) a mongod --repair\nifup wlan0\nservice udhcpd restart\nbash /home/$user/start.sh" /etc/rc.local
+
+    #Installaing cron for wvdial
+    mkdir -p /var/spool/cron/crontabs
+    echo -e "*/2 * * * * sudo node /home/$user/ApioOS/3GConnect.js\n0 4 * * * sudo reboot" > /var/spool/cron/crontabs/$user
+    chown $user:crontab /var/spool/cron/crontabs/$user
+    chmod 600 /var/spool/cron/crontabs/$user
+    service cron restart
 
     answer="x"
     while [[ $answer != "y" && $answer != "n" ]]; do
