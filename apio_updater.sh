@@ -2,7 +2,7 @@
 git config user.email "alessandrochelli@gmail.com"
 git config user.name "alechelli"
 cp -f Identifier.apio Identifier.old.apio
-git stash
+#git stash
 git pull
 cp -f Identifier.old.apio Identifier.apio
 rm Identifier.old.apio
@@ -15,5 +15,7 @@ if [ ! -z "$f" -a ! -z "$l" ];then
 fi
 #
 
-npm install
-bower install --allow-root
+npm install 2> npm_error.log
+bower install --allow-root 2> bower_error.log
+
+exit 0
