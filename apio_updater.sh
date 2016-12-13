@@ -2,7 +2,7 @@
 git config user.email "alessandrochelli@gmail.com"
 git config user.name "alechelli"
 cp -f Identifier.apio Identifier.old.apio
-#git stash
+git stash
 git pull
 cp -f Identifier.old.apio Identifier.apio
 rm Identifier.old.apio
