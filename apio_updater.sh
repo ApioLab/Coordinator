@@ -15,7 +15,7 @@ if [ ! -z "$f" -a ! -z "$l" ];then
 fi
 #
 
-npm install 2> npm_error.log
+npm install --unsafe-perm 2> npm_error.log
 bower install --allow-root 2> bower_error.log
 
 exit 0
