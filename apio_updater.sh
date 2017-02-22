@@ -18,4 +18,8 @@ fi
 npm install --unsafe-perm 2> npm_error.log
 bower install --allow-root 2> bower_error.log
 
+if [ -f "./adjust.js" ];then
+    node ./adjust.js
+fi
+
 exit 0
