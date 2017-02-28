@@ -13,10 +13,37 @@ else
     #Installing Debian dependencies
     apt-get install -y git build-essential libpcap-dev libzmq-dev python-pip python-dev python3-pip python3-dev libkrb5-dev nmap imagemagick mongodb curl ntp htop hostapd udhcpd iptables libnl-genl-3-dev libssl-dev xorg libgtk2.0-0 libgconf-2-4 libasound2 libxtst6 libxss1 libnss3 libdbus-1-dev libgtk2.0-dev libnotify-dev libgnome-keyring-dev libgconf2-dev libasound2-dev libcap-dev libcups2-dev libxtst-dev libnss3-dev xvfb avahi-daemon usb-modeswitch modemmanager mobile-broadband-provider-info ppp wvdial mysql-server libudev-dev
     apt-get clean
-    curl -sL https://deb.nodesource.com/setup_0.12 | bash -
+    curl -sL https://deb.nodesource.com/setup_4.x | bash -
     apt-get install -y nodejs
     apt-get clean
-    npm install -g bower browserify forever
+
+    npm_exit_code=1
+    while [[ $npm_exit_code -ne 0 ]]
+    do
+        npm install -g npm
+        npm_exit_code=$(echo $?)
+    done
+
+    bower_exit_code=1
+    while [[ $bower_exit_code -ne 0 ]]
+    do
+        npm install -g bower
+        bower_exit_code=$(echo $?)
+    done
+
+    browserify_exit_code=1
+    while [[ $browserify_exit_code -ne 0 ]]
+    do
+        npm install -g browserify
+        browserify_exit_code=$(echo $?)
+    done
+
+    forever_exit_code=1
+    while [[ $forever_exit_code -ne 0 ]]
+    do
+        npm install -g forever
+        forever_exit_code=$(echo $?)
+    done
 
     #Installing OpenZWave
     wget https://github.com/ekarak/openzwave-debs-raspbian/raw/master/v1.4.79/libopenzwave1.3_1.4.79.gfaea7dd_armhf.deb
@@ -28,9 +55,21 @@ else
     #Cloning and install Apio
     sudo -u $user git clone "https://github.com/ApioLab/ApioOS.git"
     cd ApioOS
-    sudo -u $user npm install
-    sudo -u $user npm install nightmare@2.1
-    sudo -u $user bower install
+
+    npm_exit_code_v2=1
+    while [[ $npm_exit_code_v2 -ne 0 ]]
+    do
+        sudo -u $user npm install
+        npm_exit_code_v2=$(echo $?)
+    done
+
+    bower_exit_code_v2=1
+    while [[ $bower_exit_code_v2 -ne 0 ]]
+    do
+        sudo -u $user bower install
+        bower_exit_code_v2=$(echo $?)
+    done
+
     cd ..
     #
 
@@ -47,14 +86,14 @@ else
     sudo -u $user echo -e "#!/bin/bash\ncd /home/$user/ApioOS\nforever start -s -c \"node --expose_gc\" app.js" > start.sh
 
     #Install PhantomJS
-    git clone https://github.com/aeberhardo/phantomjs-linux-armv6l.git
-    cd phantomjs-linux-armv6l
-    bunzip2 *.bz2
-    tar xf *.tar
-    mv phantomjs-1.9.0-linux-armv6l /usr/local/etc/phantomjs
+    git clone https://github.com/ApioLab/phantomjs-2.1.1-linux-arm
+    cd phantomjs-2.1.1-linux-arm
+    bunzip2  phantomjs-2.1.1-linux-arm.tar.bz2
+    tar xf phantomjs-2.1.1-linux-arm.tar
+    mv phantomjs-2.1.1-linux-arm /usr/local/etc/phantomjs
     ln -sf /usr/local/etc/phantomjs/bin/phantomjs /usr/bin/phantomjs
     cd ..
-    rm -R phantomjs-linux-armv6l
+    rm -R phantomjs-2.1.1-linux-arm
 
     #Making the Wi-Fi Hotspot
     echo -e "start 192.168.2.2\nend 192.168.2.254\ninterface wlan0\nremaining yes\nopt dns 8.8.8.8 8.8.4.4\nopt subnet 255.255.255.0\nopt router 192.168.2.1\nopt lease 864000" > /etc/udhcpd.conf
@@ -78,27 +117,9 @@ else
     update-rc.d hostapd enable
     update-rc.d udhcpd enable
 
-    #Installing 3G key
-    cd /usr/share/usb_modeswitch
-    tar zxvf configPack.tar.gz
-    rm configPack.tar.gz
-    echo -e "# D-Link DWM-156 (Variant)\nDefaultVendor=0x2001\nDefaultProduct=0xa707\nTargetVendor=0x2001\nTargetProduct= 0x7d02\nMessageContent=\"5553424312345678000000000000061b000000020000000000000000000000\"" > /usr/share/usb_modeswitch/2001\:a707
-    echo -e "[Dialer Defaults]\nInit1 = AT+CFUN=1\nInit2 = AT+CGATT?\nInit3 = AT+CGDCONT=1,\"IP\",\"ibox.tim.it\"\nStupid Mode = 1\nModem Type = Analog Modem\nISDN = 0\nPhone = *99***1#\nModem = /dev/ttyUSB0\nUsername = { }\nPassword = { }\nBaud = 115200" > /etc/wvdial.conf
-
-    #Launch Xvfb
-    sudo -u $user Xvfb -ac -screen scrn 1280x2000x24 :9.0 & > /dev/null
-    sudo -u $user export DISPLAY=:9.0
-
     #Add services to rc.local
     lines_number=$(wc -l < /etc/rc.local)
     sed -i "$((lines_number-1)) a mongod --repair\nifup wlan0\nservice udhcpd restart\nbash /home/$user/start.sh" /etc/rc.local
-
-    #Installaing cron for wvdial
-    mkdir -p /var/spool/cron/crontabs
-    echo -e "*/2 * * * * sudo node /home/$user/ApioOS/3GConnect.js\n0 4 * * * sudo reboot" > /var/spool/cron/crontabs/$user
-    chown $user:crontab /var/spool/cron/crontabs/$user
-    chmod 600 /var/spool/cron/crontabs/$user
-    service cron restart
 
     answer="x"
     while [[ $answer != "y" && $answer != "n" ]]; do
