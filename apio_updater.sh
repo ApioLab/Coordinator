@@ -1,6 +1,7 @@
 #!/bin/bash
 git config user.email "alessandrochelli@gmail.com"
 git config user.name "alechelli"
+rm -R  public/applications/newfile/d5-XX
 cp -f Identifier.apio Identifier.old.apio
 git stash
 git pull
