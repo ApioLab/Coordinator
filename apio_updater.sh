@@ -149,6 +149,8 @@ else
     if [ "$lines1" -ne "$lines2" ]; then
         mv "../${folderName}" "../${folderName}_new"
         mv "${currentFolder}_old" "${currentFolder}"
+        log $(cat ./apio_error.log)
+        rm ./apio_error.log
     fi
 
     reboot
