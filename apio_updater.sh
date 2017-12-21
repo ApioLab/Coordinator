@@ -21,6 +21,7 @@ else
     cp -R "${currentFolder}/public/users" "../${folderName}_new/public"
     cp -R "${currentFolder}/services/apio_logic" "../${folderName}_new/services"
     node -e '
+    "use strict";
     const fs = require("fs");
     let oldConfig = undefined, newConfig = undefined;
     try {
@@ -87,6 +88,7 @@ else
 
     # stopping services and app.js
     services=$(node -e '
+    "use strict";
     let config = undefined;
     try {
         config = require("'${currentFolder}'/configuration/custom.js");
