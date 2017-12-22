@@ -4,7 +4,7 @@ folderName=$(basename $(pwd))
 gitStatus=$(git clone -q https://github.com/ApioLab/ApioOS ../${folderName}_new 2> /dev/null; echo $?)
 
 log () {
-    echo "$(date +%F\ %R:%S) >> $@" >> ./apio_updater.log
+    echo "$(date +%F\ %R:%S) >> $@" >> ${currentFolder}/apio_updater.log
 }
 
 if [ "$gitStatus" -ne 0 ]; then
@@ -20,6 +20,7 @@ else
     rsync -aq "${currentFolder}/public/applications" "../${folderName}_new/public" --exclude newfile --exclude 10 --exclude 9
     cp -R "${currentFolder}/public/users" "../${folderName}_new/public"
     cp -R "${currentFolder}/services/apio_logic" "../${folderName}_new/services"
+
     node -e '
     "use strict";
     const fs = require("fs");
@@ -55,12 +56,12 @@ else
 
     # md5 check
     md5NpmOld=($(md5sum ${currentFolder}/package.json))
-    md5NpmNew=$(md5sum ../${folderName}_new/package.json)
+    md5NpmNew=($(md5sum ../${folderName}_new/package.json))
 
     if [ "$md5NpmOld" != "$md5NpmNew" ]; then
         cd "../${folderName}_new"
-        npmErr=$(npm install --unsafe-perm 2>&1 1>/dev/null)
-        if [ ! -z "$npmErr" ]; then
+        npmErr=$(npm install --unsafe-perm --loglevel=error 2>&1 1>/dev/null)
+        if [ "$(echo ${npmErr} | tr '\n' ';' | grep -c 'PhantomJS')" -lt "1" ]; then
             log "npm install error: ${npmErr}"
             exit 1
         fi
@@ -68,12 +69,12 @@ else
     fi
 
     md5BowerOld=($(md5sum ${currentFolder}/bower.json))
-    md5BowerNew=$(md5sum ../${folderName}_new/bower.json)
+    md5BowerNew=($(md5sum ../${folderName}_new/bower.json))
 
     if [ "$md5BowerOld" != "$md5BowerNew" ]; then
         cd "../${folderName}_new"
-        bowerErr=$(bower install --allow-root 2>&1 1>/dev/null)
-        if [ ! -z "$bowerErr" ]; then
+        bowerErr=$(bower install --allow-root --loglevel=error 2>&1 1>/dev/null)
+        if [ ! -z "${bowerErr}" ]; then
             log "bower install error: ${bowerErr}"
             exit 1
         fi
@@ -98,7 +99,7 @@ else
 
     const services = Object.keys(config.dependencies[config.type]).filter(function (service) {
         return config.dependencies[config.type][service].startAs === "process";
-    }).map(function (service) {
+    }).map(function (service) {
         if (service === "dongle") {
             return "dongle_apio.js";
         } else if (service === "enocean") {
@@ -132,7 +133,7 @@ else
     kill -9 $(ps aux | grep app.js | awk '{print $2}' | xargs)
 
     # launching adjust for least check
-    if [ -f "./apio_error.log" ]; then
+    if [ -f "${currentFolder}/apio_error.log" ]; then
         lines1=$(wc -l)
     else
         lines1=0
@@ -142,7 +143,7 @@ else
     forever start -s -c "node --expose_gc" app.js
     sleep 30
 
-    if [ -f "./apio_error.log" ]; then
+    if [ -f "${currentFolder}/apio_error.log" ]; then
         lines2=$(wc -l)
     else
         lines2=0
@@ -151,8 +152,6 @@ else
     if [ "$lines1" -ne "$lines2" ]; then
         mv "../${folderName}" "../${folderName}_new"
         mv "${currentFolder}_old" "${currentFolder}"
-        log $(cat ./apio_error.log)
-        rm ./apio_error.log
     fi
 
     reboot
