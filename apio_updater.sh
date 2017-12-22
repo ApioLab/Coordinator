@@ -30,7 +30,7 @@ else
         oldConfig = require("'${currentFolder}'/configuration/default.js");
     }
 
-    newConfig = require("'${folderName}'_new/configuration/custom.js");
+    newConfig = require("../'${folderName}'_new/configuration/custom.js");
 
     newConfig.database = oldConfig.database;
     newConfig.remote = oldConfig.remote;
