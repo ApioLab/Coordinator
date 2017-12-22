@@ -15,7 +15,7 @@ else
     cp "../${folderName}_new/configuration/default.js" "../${folderName}_new/configuration/custom.js"
 
     cp -R "${currentFolder}/node_modules" "../${folderName}_new"
-    cp -f "${currentFolder}/*.apio" "../${folderName}_new"
+    cp -f "${currentFolder}"/*.apio "../${folderName}_new"
     cp -R "${currentFolder}/public/bower_components" "../${folderName}_new/public"
     rsync -aq "${currentFolder}/public/applications" "../${folderName}_new/public" --exclude newfile --exclude 10 --exclude 9
     cp -R "${currentFolder}/public/users" "../${folderName}_new/public"
