@@ -26,7 +26,7 @@ else
     let oldConfig = undefined, newConfig = undefined;
     try {
         oldConfig = require("'${currentFolder}'/configuration/custom.js");
-    } catch {
+    } catch (ex) {
         oldConfig = require("'${currentFolder}'/configuration/default.js");
     }
 
@@ -92,7 +92,7 @@ else
     let config = undefined;
     try {
         config = require("'${currentFolder}'/configuration/custom.js");
-    } catch {
+    } catch (ex) {
         config = require("'${currentFolder}'/configuration/default.js");
     }
 
