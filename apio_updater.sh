@@ -17,7 +17,7 @@ else
     cp -R "${currentFolder}/node_modules" "../${folderName}_new"
     cp -f "${currentFolder}/*.apio" "../${folderName}_new"
     cp -R "${currentFolder}/public/bower_components" "../${folderName}_new/public"
-    rsync -aq "${currentFolder}/public/applications" "${folderName}_new/public" --exclude newfile --exclude 10 --exclude 9
+    rsync -aq "${currentFolder}/public/applications" "../${folderName}_new/public" --exclude newfile --exclude 10 --exclude 9
     cp -R "${currentFolder}/public/users" "../${folderName}_new/public"
     cp -R "${currentFolder}/services/apio_logic" "../${folderName}_new/services"
     node -e '
@@ -108,7 +108,7 @@ else
         } else if (service === "notification") {
             return "notification_mail_sms.js";
         } else {
-            return i + ".js";
+            return service + ".js";
         }
     });
 
