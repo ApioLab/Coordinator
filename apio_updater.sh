@@ -51,7 +51,7 @@ else
         }
     });
 
-    fs.writeFileSync("'${folderName}'_new/configuration/custom.js", "module.exports = " + JSON.stringify(newConfig, null, 4));'
+    fs.writeFileSync("../'${folderName}'_new/configuration/custom.js", "module.exports = " + JSON.stringify(newConfig, null, 4));'
 
     # md5 check
     md5NpmOld=($(md5sum ${currentFolder}/package.json))
