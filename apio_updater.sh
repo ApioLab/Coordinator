@@ -57,7 +57,7 @@ else
     md5NpmOld=($(md5sum ${currentFolder}/package.json))
     md5NpmNew=$(md5sum ../${folderName}_new/package.json)
 
-    if [ "$md5NpmOld" -ne "$md5NpmNew" ]; then
+    if [ "$md5NpmOld" != "$md5NpmNew" ]; then
         cd "../${folderName}_new"
         npmErr=$(npm install --unsafe-perm 2>&1 1>/dev/null)
         if [ ! -z "$npmErr" ]; then
@@ -70,7 +70,7 @@ else
     md5BowerOld=($(md5sum ${currentFolder}/bower.json))
     md5BowerNew=$(md5sum ../${folderName}_new/bower.json)
 
-    if [ "$md5BowerOld" -ne "$md5BowerNew" ]; then
+    if [ "$md5BowerOld" != "$md5BowerNew" ]; then
         cd "../${folderName}_new"
         bowerErr=$(bower install --allow-root 2>&1 1>/dev/null)
         if [ ! -z "$bowerErr" ]; then
