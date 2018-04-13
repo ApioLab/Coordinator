@@ -1,7 +1,8 @@
 #!/bin/bash
 currentFolder=$(pwd)
 folderName=$(basename $(pwd))
-gitStatus=$(git clone -q https://github.com/ApioLab/ApioOS ../${folderName}_new 2> /dev/null; echo $?)
+branchName=$(cat ${currentFolder}/.git/HEAD | rev | cut -d '/' -f1 | rev)
+gitStatus=$(git clone -q -b ${branchName} https://github.com/ApioLab/ApioOS ../${folderName}_new 2> /dev/null; echo $?)
 
 log () {
     echo "$(date +%F\ %R:%S) >> $@" >> ${currentFolder}/apio_updater.log
