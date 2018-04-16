@@ -155,6 +155,10 @@ else
         mv "${currentFolder}_old" "${currentFolder}"
     fi
 
+    npm install -g pm2
+    pm2 install pm2-logrotate
+    sed -i -e 's/forever start -s -c "node --expose_gc" app.js/pm2 start --node-args="--expose_gc" app.js/' ${currentFolder}/../start.sh
+
     reboot
 
     exit 0
