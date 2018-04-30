@@ -13,15 +13,21 @@ if [ "$gitStatus" -ne 0 ]; then
     exit 1
 else
     # copy files
+    log "creo custom.js"
     cp "../${folderName}_new/configuration/default.js" "../${folderName}_new/configuration/custom.js"
 
     # cp -R "${currentFolder}/node_modules" "../${folderName}_new"
+    log "copio files .apio"
     cp -f "${currentFolder}"/*.apio "../${folderName}_new"
     # cp -R "${currentFolder}/public/bower_components" "../${folderName}_new/public"
+    log "copio applicazioni"
     rsync -aq "${currentFolder}/public/applications" "../${folderName}_new/public" --exclude newfile --exclude 10 --exclude 9
+    log "copio utenti"
     cp -R "${currentFolder}/public/users" "../${folderName}_new/public"
+    log "copio logiche"
     cp -R "${currentFolder}/services/apio_logic" "../${folderName}_new/services"
 
+    log "modifico custom.js"
     node -e '
     "use strict";
     const fs = require("fs");
@@ -59,6 +65,7 @@ else
     md5NpmOld=($(md5sum ${currentFolder}/package.json))
     md5NpmNew=($(md5sum ../${folderName}_new/package.json))
 
+    log "controllo package.json"
     if [ "$md5NpmOld" != "$md5NpmNew" ]; then
         cd "../${folderName}_new"
         npmErr=$(npm install --unsafe-perm --loglevel=error 2>&1 1>/dev/null)
@@ -72,6 +79,7 @@ else
     md5BowerOld=($(md5sum ${currentFolder}/bower.json))
     md5BowerNew=($(md5sum ../${folderName}_new/bower.json))
 
+    log "controllo bower.json"
     if [ "$md5BowerOld" != "$md5BowerNew" ]; then
         cd "../${folderName}_new"
         bowerErr=$(bower install --allow-root --loglevel=error 2>&1 1>/dev/null)
@@ -83,9 +91,11 @@ else
     fi
 
     # rename old folder
+    log "sposto cartella vecchia"
     mv "${currentFolder}" "${currentFolder}_old"
 
     # rename new folder
+    log "sposto cartella nuova"
     mv "../${folderName}_new" "../${folderName}"
 
     # stopping services and app.js
@@ -126,6 +136,7 @@ else
     # create an array
     eval services=(${services})
 
+    log "killo app.js e servizi"
     for service in "${services[@]}"
     do
         kill -9 $(ps aux | grep ${service} | awk '{print $2}' | xargs)
@@ -140,6 +151,7 @@ else
         lines1=0
     fi
 
+    log "riavvio app.js e attendo"
     cd "../${folderName}"
     forever start -s -c "node --expose_gc" app.js
     sleep 30
@@ -151,13 +163,18 @@ else
     fi
 
     if [ "$lines1" -ne "$lines2" ]; then
+        log "ho avuto un errore inaspettato quindi rimetto tutto apposto"
         mv "../${folderName}" "../${folderName}_new"
         mv "${currentFolder}_old" "${currentFolder}"
     fi
 
+    log "installo pm2"
     npm install -g pm2
+    log "installo pm2-logrotate"
     pm2 install pm2-logrotate
+    log "modifico start.sh"
     sed -i -e 's/forever start -s -c "node --expose_gc" app.js/pm2 start --node-args="--expose_gc" app.js/' ${currentFolder}/../start.sh
+    log "modifico rc.local"
     sed -i -e 's/^bash \/home\/pi\/start.sh$/sudo &/' /etc/rc.local
 
     reboot
