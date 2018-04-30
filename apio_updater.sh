@@ -69,7 +69,7 @@ else
     if [ "$md5NpmOld" != "$md5NpmNew" ]; then
         cd "../${folderName}_new"
         npmErr=$(npm install --unsafe-perm --loglevel=error 2>&1 1>/dev/null)
-        if [ "$(echo ${npmErr} | tr '\n' ';' | grep -c 'PhantomJS')" -lt "1" ]; then
+        if [ "$(echo ${npmErr} | tr '\n' ';' | grep -c 'PhantomJS')" -gt "1" ]; then
             log "npm install error:" ${npmErr}
             exit 1
         fi
