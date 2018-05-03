@@ -169,7 +169,7 @@ else
     log "installo pm2"
     npm install -g pm2
     log "installo pm2-logrotate"
-    pm2 install pm2-logrotate
+    pm2 install pm2-logrotate@2.2.0
     log "modifico start.sh"
     sed -i -e 's/forever start -s -c "node --expose_gc" app.js/pm2 start --node-args="--expose_gc" app.js/' ${currentFolder}/../start.sh
     log "modifico rc.local"
