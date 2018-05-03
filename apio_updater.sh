@@ -75,7 +75,7 @@ else
     cd "../${folderName}_new"
     npmErr=$(npm install --unsafe-perm --loglevel=error 2>&1 1>/dev/null)
     if [ "$(echo ${npmErr} | tr '\n' ';' | grep -c 'PhantomJS')" -gt "1" ]; then
-        log "npm install error:" ${npmErr}
+        log "npm install error: ${npmErr}"
         exit 1
     fi
     cd "$currentFolder"
@@ -84,7 +84,7 @@ else
     cd "../${folderName}_new"
     bowerErr=$(bower install --allow-root --loglevel=error 2>&1 1>/dev/null)
     if [ ! -z "${bowerErr}" ]; then
-        log "bower install error:" ${bowerErr}
+        log "bower install error: ${bowerErr}"
         exit 1
     fi
     cd "$currentFolder"
