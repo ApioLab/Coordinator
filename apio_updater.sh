@@ -12,7 +12,19 @@ if [ "$gitStatus" -ne 0 ]; then
     log "git clone error"
     exit 1
 else
-    # copy files
+    log "disabilito il cron"
+    for file in $(ls /var/spool/cron/crontabs)
+    do
+        sed -i -e 's/.*relaunch_ppp.sh/#&/' /var/spool/cron/crontabs/${file}
+    done
+    service cron restart
+
+    log "killo relaunch_ppp.sh se è in running"
+    kill -9 $(ps aux | grep relaunch_ppp.sh | awk '{print $2}' | xargs)
+
+    log "killo Apio"
+    pkill node
+
     log "creo custom.js"
     cp "../${folderName}_new/configuration/default.js" "../${folderName}_new/configuration/custom.js"
 
@@ -59,34 +71,23 @@ else
 
     fs.writeFileSync("../'${folderName}'_new/configuration/custom.js", "module.exports = " + JSON.stringify(newConfig, null, 4));'
 
-    # md5 check
-    md5NpmOld=($(md5sum ${currentFolder}/package.json))
-    md5NpmNew=($(md5sum ../${folderName}_new/package.json))
-
-    log "controllo package.json"
-    if [ "$md5NpmOld" != "$md5NpmNew" ]; then
-        cd "../${folderName}_new"
-        npmErr=$(npm install --unsafe-perm --loglevel=error 2>&1 1>/dev/null)
-        if [ "$(echo ${npmErr} | tr '\n' ';' | grep -c 'PhantomJS')" -gt "1" ]; then
-            log "npm install error:" ${npmErr}
-            exit 1
-        fi
-        cd "$currentFolder"
+    log "lancio npm"
+    cd "../${folderName}_new"
+    npmErr=$(npm install --unsafe-perm --loglevel=error 2>&1 1>/dev/null)
+    if [ "$(echo ${npmErr} | tr '\n' ';' | grep -c 'PhantomJS')" -gt "1" ]; then
+        log "npm install error:" ${npmErr}
+        exit 1
     fi
+    cd "$currentFolder"
 
-    md5BowerOld=($(md5sum ${currentFolder}/bower.json))
-    md5BowerNew=($(md5sum ../${folderName}_new/bower.json))
-
-    log "controllo bower.json"
-    if [ "$md5BowerOld" != "$md5BowerNew" ]; then
-        cd "../${folderName}_new"
-        bowerErr=$(bower install --allow-root --loglevel=error 2>&1 1>/dev/null)
-        if [ ! -z "${bowerErr}" ]; then
-            log "bower install error:" ${bowerErr}
-            exit 1
-        fi
-        cd "$currentFolder"
+    log "lancio bower"
+    cd "../${folderName}_new"
+    bowerErr=$(bower install --allow-root --loglevel=error 2>&1 1>/dev/null)
+    if [ ! -z "${bowerErr}" ]; then
+        log "bower install error:" ${bowerErr}
+        exit 1
     fi
+    cd "$currentFolder"
 
     # rename old folder
     log "sposto cartella vecchia"
