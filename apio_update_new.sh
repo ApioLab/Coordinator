@@ -154,9 +154,9 @@ else
   "use strict";
   let config = undefined;
   try {
-    config = require("'${folderName}'/configuration/custom.js");
+    config = require("./configuration/custom.js");
   } catch (ex) {
-    config = require("'${folderName}'/configuration/default.js");
+    config = require("./configuration/default.js");
   }
 
   const services = Object.keys(config.dependencies[config.type]).filter(function (service) {
